@@ -1,0 +1,57 @@
+lexik_jwt_authentication:
+    # Clé privée pour la signature des tokens (doit rester secrète)
+    secret_key: '%env(resolve:JWT_SECRET_KEY)%'
+
+    # Clé publique pour la vérification des tokens (peut être distribuée)
+    public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+
+    # Phrase de passe pour la clé privée (doit être gardée secrète)
+    pass_phrase: '%env(resolve:JWT_PHRASE)%'
+
+    # Durée de vie du token en secondes (1 heure par défaut)
+    token_ttl: 3600
+
+    # Durée de vie du token de refresh en secondes (24 heures)
+    refresh_token_ttl: 86400
+
+    # Algorithme de signature (RS256 par défaut pour les clés RSA)
+    signature_algorithm: RS256
+
+    # Configuration des encodeurs de tokens
+    # L'encodeur par défaut utilise les clés configurées ci-dessus
+    encoders:
+        JWT:
+            algorithm: RS256
+            public_key: '%env(resolve:JWT_PUBLIC_KEY)%'
+
+    # Configuration des extracteurs de tokens
+    # Plusieurs méthodes d'extraction peuvent être activées simultanément
+    token_extractors:
+        # Authorization header: Bearer <token>
+        authorization_header:
+            enabled: true
+            prefix: Bearer
+            name: Authorization
+
+        # Cookie: JWT=<token>
+        cookie:
+            enabled: true
+            name: JWT
+
+        # Query parameter: ?token=<token>
+        query_parameter:
+            enabled: false
+            name: token
+
+    # Configuration du audience claim (optionnel)
+    # audience:
+    #     - 'my_api_audience'
+
+    # Configuration de l'issuer claim (optionnel)
+    # issuer: 'my_issuer'
+
+    # Clause de jetons lus uniquement (stateless)
+    # disable_leak_check: false
+
+    # Autoriser les tokens non vérifiés en développement
+    # allow_no_expiration: false

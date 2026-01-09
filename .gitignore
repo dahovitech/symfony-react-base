@@ -19,3 +19,10 @@
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+###> lexik/jwt-authentication-bundle ###
+# Clés JWT - NE JAMAIS COMMITTER CES FICHIERS !
+config/jwt/private.pem
+config/jwt/*.pem
+!config/jwt/public.pem.example
+###< lexik/jwt-authentication-bundle ###

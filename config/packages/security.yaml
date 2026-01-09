@@ -1,39 +1,103 @@
+# Configuration de la sécurité Symfony
+# Documentation: https://symfony.com/doc/current/security.html
+
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Configuration des hashers de mots de passe
+    # L'algorithme 'auto' choisit automatiquement le meilleur algorithme disponible
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
 
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    # Configuration des providers d'utilisateurs
     providers:
-        users_in_memory: { memory: null }
+        # Provider utilisant Doctrine pour récupérer les utilisateurs
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
 
+    # Configuration des pare-feux (firewalls)
     firewalls:
+        # Environnement de développement - toujours autorisé
         dev:
-            # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+
+        # Pare-feu pour l'API REST avec authentification JWT
+        api:
+            # Toutes les routes commençant par /api
+            pattern: ^/api/
+            # Mode stateless - pas de session
+            stateless: true
+            # Utilisation de l'authentification JWT
+            jwt: ~
+            # Provider d'utilisateurs à utiliser
+            provider: app_user_provider
+            # Points d'entrée pour l'authentification
+            entry_point: jwt
+
+        # Pare-feu principal pour l'authentification par formulaire
         main:
+            # Lazy loading - la session n'est créée que si nécessaire
             lazy: true
-            provider: users_in_memory
+            # Provider d'utilisateurs
+            provider: app_user_provider
+            # Authenticator personnalisé pour le formulaire de login
+            custom_authenticator:
+                - App\Security\LoginFormAuthenticator
+            # Configuration de la déconnexion
+            logout:
+                path: app_logout
+                target: app_login
+                # Invalider la session lors de la déconnexion
+                invalidate_session: true
+            # Configuration du remember me (optionnel)
+            # remember_me:
+            #     secret: '%env(APP_SECRET)%'
+            #     lifetime: 604800
+            #     path: /
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Note: Only the *first* matching rule is applied
+    # Règles d'accès aux routes
     access_control:
+        # Routes publiques de l'API
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        
+        # Routes protégées de l'API - nécessite une authentification complète
+        - { path: ^/api/profile, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
+
+        # Routes d'administration
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
 
+    # Stratégie de gestion des erreurs d'accès deny-all =拒绝所有访问
+    # L'autre option est 'allow_no_user' qui permet l'accès sans utilisateur authentifié
+    access_denied_url: /login
+
+# Configuration spécifique à l'environnement de test
 when@test:
     security:
+        # Réduction des coûts de hashage pour les tests (performance)
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4  # Valeur minimale pour bcrypt
+                time_cost: 3  # Valeur minimale pour argon
+                memory_cost: 10  # Valeur minimale pour argon
+
+# Configuration spécifique à l'environnement de production
+when@prod:
+    security:
+        password_hashers:
+            # En production, utiliser Argon2i ou bcrypt avec des paramètres plus stricts
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 12  # Coût plus élevé pour la production
+                time_cost: 4
+                memory_cost: 65536
+
+        # En production, on peut ajouter des restrictions supplémentaires
+        access_control:
+            # Forcer HTTPS pour les routes sensibles
+            # - { path: ^/admin, roles: ROLE_ADMIN, requires_channel: https }

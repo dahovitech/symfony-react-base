@@ -1,0 +1,164 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width: 450px; padding: 40px 20px; margin: 0 auto;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; margin-bottom: 10px;">Bienvenue</h1>
+        <p style="color: #666;">Connectez-vous pour accéder à votre compte</p>
+    </div>
+
+    <div style="background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <form method="post">
+            {# Affichage des erreurs d'authentification #}
+            {% if error %}
+                <div class="alert alert-danger" style="
+                    padding: 12px 15px;
+                    margin-bottom: 20px;
+                    background-color: #f8d7da;
+                    border: 1px solid #f5c2c7;
+                    border-radius: 4px;
+                    color: #842029;
+                    font-size: 14px;
+                ">
+                    <strong>Erreur d'authentification</strong><br>
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            {# Champ email #}
+            <div style="margin-bottom: 20px;">
+                <label for="inputEmail" style="
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 500;
+                    color: #333;
+                ">Adresse email</label>
+                <input 
+                    type="email" 
+                    value="{{ last_username }}" 
+                    name="email" 
+                    id="inputEmail" 
+                    class="form-control"
+                    style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        box-sizing: border-box;
+                        font-size: 16px;
+                        transition: border-color 0.2s;
+                    "
+                    required 
+                    autofocus
+                    placeholder="vous@exemple.com"
+                    onfocus="this.style.borderColor='#0d6efd'"
+                    onblur="this.style.borderColor='#ddd'"
+                >
+            </div>
+
+            {# Champ mot de passe #}
+            <div style="margin-bottom: 25px;">
+                <label for="inputPassword" style="
+                    display: block;
+                    margin-bottom: 8px;
+                    font-weight: 500;
+                    color: #333;
+                ">Mot de passe</label>
+                <input 
+                    type="password" 
+                    name="password" 
+                    id="inputPassword" 
+                    class="form-control"
+                    style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        box-sizing: border-box;
+                        font-size: 16px;
+                        transition: border-color 0.2s;
+                    "
+                    required
+                    placeholder="••••••••"
+                    onfocus="this.style.borderColor='#0d6efd'"
+                    onblur="this.style.borderColor='#ddd'"
+                >
+            </div>
+
+            {# Option "Se souvenir de moi" #}
+            <div style="margin-bottom: 25px; display: flex; align-items: center;">
+                <input 
+                    type="checkbox" 
+                    id="remember_me" 
+                    name="_remember_me"
+                    style="margin-right: 8px; width: 18px; height: 18px;"
+                >
+                <label for="remember_me" style="color: #666; cursor: pointer;">
+                    Se souvenir de moi
+                </label>
+            </div>
+
+            {# Token CSRF caché #}
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+            {# Bouton de soumission #}
+            <button 
+                type="submit" 
+                class="btn btn-primary btn-lg w-100"
+                style="
+                    width: 100%;
+                    padding: 14px;
+                    background-color: #0d6efd;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    font-size: 16px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: background-color 0.2s;
+                "
+                onmouseover="this.style.backgroundColor='#0b5ed7'"
+                onmouseout="this.style.backgroundColor='#0d6efd'"
+            >
+                Se connecter
+            </button>
+        </form>
+
+        {# Liens complémentaires #}
+        <div style="margin-top: 25px; text-align: center; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                Pas encore de compte ?
+                <a href="{{ path('app_register') }}" style="color: #0d6efd; text-decoration: none;">
+                    Créer un compte
+                </a>
+            </p>
+            <p style="color: #666; font-size: 14px;">
+                <a href="{{ path('app_forgot_password') }}" style="color: #6c757d; text-decoration: none;">
+                    Mot de passe oublié ?
+                </a>
+            </p>
+        </div>
+    </div>
+
+    {# Informations de connexion de test #}
+    <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px; font-size: 13px; color: #666;">
+        <strong style="color: #333;">Compte de test :</strong><br>
+        Email : test@example.com<br>
+        Mot de passe : password123
+    </div>
+</div>
+
+<style>
+    /* Styles supplémentaires pour le formulaire */
+    .form-control:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+    }
+    
+    .alert {
+        word-wrap: break-word;
+    }
+</style>
+{% endblock %}
